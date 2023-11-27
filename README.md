@@ -12493,15 +12493,292 @@ plt.show()
 
 
 
-```python
-aq_trend_df.to_csv("main_data.csv", index=False)
-```
+
 
 ## Conclusion
 * Untuk pertanyaan 1, dapat disimpulkan bahwa Stasiun Dongsi memiliki tingkat pencemaran udara tertinggi, sedangkat Stasiun Dingling memiliki tingkat pencemaran udara terendah.
 * Untuk pertanyaan 2, dapat disimpulkan dari data di atas bahwa tingkat pencemaran udara relatif meningkat dari tahun 2013 hingga 2017, walaupun konsentrasi O3 mengalami penurunan cukup drastis dari tahun 2013 hingga 2017.
 
-Berikut merupakan tangkapan layar yang telah dibuat
+
+
+# Dashboard Sederhana
+
+## Persiapan
+
+##### Menyimpan data ke local
+
+```python
+aq_trend_df.to_csv("main_data.csv", index=False)
+```
+
+##### Menginstall library yang digunakan
+`conda activate main-ds`  
+
+`pip install streamlit babel`
+
+
+## Menyiapakan DataFrame
+
+### Mengimpor library
+```python
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+import streamlit as st
+from babel.numbers import format_currency
+sns.set(style='dark')
+```
+
+### Membuat fungsi pemanggil DataFrame
+
+##### aq_mean_df
+
+```python
+def create_aq_mean_df(df):
+    aq_mean_df = pd.DataFrame({
+        'station_name': ['changping_station', 'dingling_station', 'dongsi_station', 'shunyi_station'],
+        'PM2.5': [df['PM2.5_x_x'].mean(), df['PM2.5_y_x'].mean(), df['PM2.5_x_y'].mean(), df['PM2.5_y_y'].mean()],
+        'PM10': [df['PM10_x_x'].mean(), df['PM10_y_x'].mean(), df['PM10_x_y'].mean(), df['PM10_y_y'].mean()]
+    })
+
+    return aq_mean_df
+```
+
+##### pm25_trend_df
+
+```python
+def create_pm25_trend_df(df):
+    pm25_trend_df = pd.DataFrame({
+        'Changping Station': df['PM2.5_x_x'],
+        'Dingling Station': df['PM2.5_y_x'],
+        'Dongsi Station': df['PM2.5_x_y'],
+        'Shunyi Station': df['PM2.5_y_y']
+        })
+    pm25_trend_df.columns.name='Station'
+    pm25_trend_df.index.name='year'
+    return pm25_trend_df
+```
+
+##### pm10_trend_df
+
+```python
+def create_pm10_trend_df(df):
+    pm10_trend_df = pd.DataFrame({
+        'Changping Station': df['PM10_x_x'],
+        'Dingling Station': df['PM10_y_x'],
+        'Dongsi Station': df['PM10_x_y'],
+        'Shunyi Station': df['PM10_y_y']
+        })
+    pm10_trend_df.columns.name='Station'
+    pm10_trend_df.index.name='year'
+    return pm10_trend_df
+```
+
+##### so2_trend_df
+
+```python
+def create_so2_trend_df(df):
+    so2_trend_df = pd.DataFrame({
+        'Changping Station': df['SO2_x_x'],
+        'Dingling Station': df['SO2_y_x'],
+        'Dongsi Station': df['SO2_x_y'],
+        'Shunyi Station': df['SO2_y_y']
+        })
+    so2_trend_df.columns.name='Station'
+    so2_trend_df.index.name='year'
+    return so2_trend_df
+```
+
+##### no2_trend_df
+
+```python
+def create_no2_trend_df(df):
+    no2_trend_df = pd.DataFrame({
+        'Changping Station': df['NO2_x_x'],
+        'Dingling Station': df['NO2_y_x'],
+        'Dongsi Station': df['NO2_x_y'],
+        'Shunyi Station': df['NO2_y_y']
+        })
+    no2_trend_df.columns.name='Station'
+    no2_trend_df.index.name='year'
+    return no2_trend_df
+```
+
+##### co_trend_df
+
+```python
+def create_co_trend_df(df):
+    co_trend_df = pd.DataFrame({
+        'Changping Station': df['CO_x_x'],
+        'Dingling Station': df['CO_y_x'],
+        'Dongsi Station': df['CO_x_y'],
+        'Shunyi Station': df['CO_y_y']
+        })
+    co_trend_df.columns.name='Station'
+    co_trend_df.index.name='year'
+    return co_trend_df
+```
+
+##### o3_trend_df
+
+```python
+def create_o3_trend_df(df):
+    o3_trend_df = pd.DataFrame({
+        'Changping Station': df['O3_x_x'],
+        'Dingling Station': df['O3_y_x'],
+        'Dongsi Station': df['O3_x_y'],
+        'Shunyi Station': df['O3_y_y']
+        })
+    o3_trend_df.columns.name='Station'
+    o3_trend_df.index.name='year'
+    return o3_trend_df
+```
+
+### Memasukkan berkas data
+
+```python
+main_df = pd.read_csv('main_data.csv')
+```
+
+### Memanggil DataFrame
+
+```python
+aq_mean_df = create_aq_mean_df(main_df)
+pm25_trend_df = create_pm25_trend_df(main_df)
+pm10_trend_df = create_pm10_trend_df(main_df)
+so2_trend_df = create_so2_trend_df(main_df)
+no2_trend_df = create_no2_trend_df(main_df)
+co_trend_df = create_co_trend_df(main_df)
+o3_trend_df = create_o3_trend_df(main_df)
+```
+
+### Membuat Header Dashboard
+
+```python
+st.header("Air Quality Analysis")
+```
+
+### Memasukkan Visualisasi Data Pencemaran Udara Tertinggi dan Terendah
+
+```python
+st.subheader('Station with the Highest and Lowest Air Pollution')
+
+fig, ax = plt.subplots(nrows=1, ncols=2, figsize=(24, 6))
+
+colors = ['#d3d3d3', 'green', 'red', '#d3d3d3']
+
+sns.barplot(x='station_name', y='PM2.5', data=aq_mean_df, palette=colors, ax=ax[0])
+ax[0].set_ylabel(None)
+ax[0].set_xlabel(None)
+ax[0].set_title(r"Berdasarkan Konsentrasi PM$_2$$_.$$_5$", loc='center', fontsize=30)
+ax[0].tick_params(axis ='x', labelsize=12)
+
+sns.barplot(x='station_name', y='PM10', data=aq_mean_df, palette=colors, ax=ax[1])
+ax[1].set_ylabel(None)
+ax[1].set_xlabel(None)
+ax[1].set_title(r"Berdasarkan Konsentrasi PM$_1$$_0$", loc='center', fontsize=30)
+ax[1].tick_params(axis ='x', labelsize=12)
+
+st.pyplot(fig)
+```
+
+### Memasukkan Visualisasi Trend Pencemaran Udara
+
+```python
+st.subheader("Air Pollution Trends")
+
+col1, col2 = st.columns(2)
+
+with col1:
+    fig, ax = plt.subplots(figsize=(20,10))
+    sns.lineplot(
+        data=pm25_trend_df,
+        ax=ax
+        )
+    ax.set_title(r"Based on PM$_2$$_.$$_5$ Concentration", loc="center", fontsize=50)
+    ax.set_ylabel(None)
+    ax.set_xlabel(None)
+    ax.tick_params(axis='x', labelsize=35)
+    ax.tick_params(axis='y', labelsize=30)
+    st.pyplot(fig)
+
+with col2:
+    fig, ax = plt.subplots(figsize=(20,10))
+    sns.lineplot(
+        data=pm10_trend_df,
+        ax=ax
+    )
+    ax.set_title(r"Based on PM$_1$$_0$ Concentration", loc="center", fontsize=50)
+    ax.set_ylabel(None)
+    ax.set_xlabel(None)
+    ax.tick_params(axis='x', labelsize=35)
+    ax.tick_params(axis='y', labelsize=30)
+    st.pyplot(fig)
+
+col3, col4 = st.columns(2)
+
+with col3:
+    fig, ax = plt.subplots(figsize=(20,10))
+    sns.lineplot(
+        data=so2_trend_df,
+        ax=ax
+    )
+    ax.set_title(r"Based on SO$_2$ Concentration", loc="center", fontsize=50)
+    ax.set_ylabel(None)
+    ax.set_xlabel(None)
+    ax.tick_params(axis='x', labelsize=35)
+    ax.tick_params(axis='y', labelsize=30)
+    st.pyplot(fig)
+
+with col4:
+    fig, ax = plt.subplots(figsize=(20,10))
+    sns.lineplot(
+        data=no2_trend_df,
+        ax=ax
+    )
+    ax.set_title(r"Based on NO$_2$ Concentration", loc="center", fontsize=50)
+    ax.set_ylabel(None)
+    ax.set_xlabel(None)
+    ax.tick_params(axis='x', labelsize=35)
+    ax.tick_params(axis='y', labelsize=30)
+    st.pyplot(fig)
+
+col5, col6 = st.columns(2)
+
+with col5:
+    fig, ax = plt.subplots(figsize=(20, 10))
+    sns.lineplot(
+        data=co_trend_df,
+        ax=ax
+    )
+    ax.set_title("Based on CO Concentration", loc="center", fontsize=50)
+    ax.set_ylabel(None)
+    ax.set_xlabel(None)
+    ax.tick_params(axis='x', labelsize=35)
+    ax.tick_params(axis='y', labelsize=30)
+    st.pyplot(fig)
+
+with col6:
+    fig, ax = plt.subplots(figsize=(20,10))
+    sns.lineplot(
+        data=o3_trend_df,
+        ax=ax
+    )
+    ax.set_title(r"Based on O$_3$ Concentration", loc="center", fontsize=50)
+    ax.set_ylabel(None)
+    ax.set_xlabel(None)
+    ax.tick_params(axis='x', labelsize=35)
+    ax.tick_params(axis='y', labelsize=30)
+    st.pyplot(fig)
+```
+
+### Membuat Caption
+
+```python
+st.caption('Copyright (c) Dicoding 2023')
+```
+
+### Tangkapan Layar Dashboard
 ![[png](Screenshot%20(6).png)](https://github.com/Grecilia/dicoding_proyek_analisis_data_sub/blob/9c51a8f144abfb1e24c0cac51397dae0de257583/images/Screenshot%20(6).png)
 ![[png](Screenshot%20(7).png)](https://github.com/Grecilia/dicoding_proyek_analisis_data_sub/blob/9c51a8f144abfb1e24c0cac51397dae0de257583/images/Screenshot%20(7).png)
 
