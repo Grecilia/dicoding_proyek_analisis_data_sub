@@ -12515,8 +12515,8 @@ pip install numpy pandas scipy matplotlib seaborn jupyter streamlit babel
 
 ### Menjalankan streamlit di local
 
-```python
-aq_trend_df.to_csv("main_data.csv", index=False)
+```
+streamlit run air_quality_dashboard.py
 ```
 
 ### Tangkapan Layar Dashboard
